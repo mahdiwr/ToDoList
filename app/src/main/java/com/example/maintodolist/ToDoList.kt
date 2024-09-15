@@ -1,4 +1,6 @@
 package com.example.maintodolist
+import android.util.Log
+import com.google.gson.Gson
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -51,12 +53,8 @@ fun main() {
                 toDoList.showTask()
             }
             "5" -> {
-                val list= listOf(
-                    Task(id=1, title = "ali"),
-                    Task(id=2, title = "ali2"),
-                    Task(id=3, title = "ali3")
-                )
-                toDoList.saveListToJsonFile(list,filePath)
+
+                toDoList.saveListToJsonFile(toDoList.taskList,filePath)
                 println("your file was saved")
             }
             "0" -> {
@@ -74,7 +72,7 @@ data class Task(
     val id: Int = 0,
     val title: String = "",
     var isCompleted: Boolean = false,
-//    val createdDate: Date = Calendar.getInstance().time
+//  val createdDate: Date = Calendar.getInstance().time
 )
 
 class ToDoList {
@@ -118,8 +116,9 @@ class ToDoList {
         }
         println()
     }
-    fun saveListToJsonFile(list: List<Task>, filePath: String) {
-        val jsonString = Json.encodeToString(list)
+    fun saveListToJsonFile(list: MutableList<Task>, filePath: String) {
+        val jsonString = Gson().toJson(list)
+//        val jsonString = Gson().encodeToString(list)
         File(filePath,"todo.json").writeText(jsonString)
     }
 
