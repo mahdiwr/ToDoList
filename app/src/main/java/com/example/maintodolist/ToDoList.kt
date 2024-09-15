@@ -1,16 +1,21 @@
 package com.example.maintodolist
-
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.File
 import java.util.Calendar
 import java.util.Date
 
 fun main() {
     val toDoList = ToDoList()
+    val filePath = "D:/list"
 
     while (true) {
         println("1-> add task")
         println("2-> remove task")
         println("3-> complete task")
         println("4-> show tasks")
+        println("5-> save file")
         println("0-> exit")
 
         when (readLine()) {
@@ -45,6 +50,15 @@ fun main() {
             "4" -> {
                 toDoList.showTask()
             }
+            "5" -> {
+                val list= listOf(
+                    Task(id=1, title = "ali"),
+                    Task(id=2, title = "ali2"),
+                    Task(id=3, title = "ali3")
+                )
+                toDoList.saveListToJsonFile(list,filePath)
+                println("your file was saved")
+            }
             "0" -> {
                 println("Exiting...")
                 break
@@ -55,18 +69,18 @@ fun main() {
         }
     }
 }
-
+@Serializable
 data class Task(
     val id: Int = 0,
     val title: String = "",
     var isCompleted: Boolean = false,
-    val createdDate: Date = Calendar.getInstance().time
+//    val createdDate: Date = Calendar.getInstance().time
 )
 
 class ToDoList {
 
-    private val taskList = mutableListOf<Task>()
-    private var nextId = 0
+    val taskList = mutableListOf<Task>()
+    var nextId = 0
 
     fun addTask(title: String) {
         taskList.add(Task(id = nextId++, title = title))
@@ -104,4 +118,9 @@ class ToDoList {
         }
         println()
     }
+    fun saveListToJsonFile(list: List<Task>, filePath: String) {
+        val jsonString = Json.encodeToString(list)
+        File(filePath,"todo.json").writeText(jsonString)
+    }
+
 }
