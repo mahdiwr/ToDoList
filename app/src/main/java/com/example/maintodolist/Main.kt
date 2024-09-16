@@ -70,7 +70,7 @@ fun main() {
             }
 
             "8" -> {
-                println("input your key : ")
+                print("input your key : ")
                 val key_word = readlnOrNull()
                 toDoList.search(key_word ?: "")
             }
