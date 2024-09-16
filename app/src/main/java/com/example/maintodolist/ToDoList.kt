@@ -1,15 +1,10 @@
 package com.example.maintodolist
-import android.util.Log
+
+import android.app.DownloadManager.Query
 import com.google.gson.Gson
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.Calendar
 import java.util.Date
-import android.content.Context
-import java.io.IOException
-import java.time.LocalDateTime
 
 
 fun main() {
@@ -24,6 +19,7 @@ fun main() {
         println("5-> Save file")
         println("6-> Input Json")
         println("7-> Sort By Date")
+        println("8-> Search task")
         println("0-> Exit")
 
         when (readlnOrNull()) {
@@ -35,6 +31,7 @@ fun main() {
                     toDoList.showTask()
                 }
             }
+
             "2" -> {
                 print("Input the item number to remove: ")
                 val itemForRemoved = readLine()?.toIntOrNull()?.minus(1)
@@ -45,6 +42,7 @@ fun main() {
                     println("Invalid input.")
                 }
             }
+
             "3" -> {
                 print("Input the item number to mark as completed: ")
                 val itemForCompleted = readLine()?.toIntOrNull()?.minus(1)
@@ -55,28 +53,40 @@ fun main() {
                     println("Invalid input.")
                 }
             }
+
             "4" -> {
                 toDoList.showTask()
             }
+
             "5" -> {
-                toDoList.saveListToJsonFile(toDoList.taskList,filePath)
+                toDoList.saveListToJsonFile(toDoList.taskList, filePath)
                 println("your file was saved")
             }
+
             "6" -> {
                 println("input your path : ")
                 val path_file = readlnOrNull()
-                toDoList.gsonReader(path_file?:"")
+                toDoList.gsonReader(path_file ?: "")
             }
+
             "7" -> {
                 println("sorted by Date : ${toDoList.sort(toDoList.taskList)}")
                 toDoList.taskList.forEach { task ->
                     println("Task: ${task.title}, Created at: ${task.createdDate}")
                 }
             }
+
+            "8" -> {
+                println("input your key : ")
+                val key_word = readlnOrNull()
+                toDoList.search(key_word ?: "")
+            }
+
             "0" -> {
                 println("Exiting...")
                 break
             }
+
             else -> {
                 println("Invalid option. Please try again.")
             }
@@ -132,10 +142,12 @@ class ToDoList {
         }
         println()
     }
+
     fun saveListToJsonFile(list: MutableList<Task>, filePath: String) {
         val jsonString = Gson().toJson(list)
-        File(filePath,"todo.json").writeText(jsonString)
+        File(filePath, "todo.json").writeText(jsonString)
     }
+
     fun gsonReader(filePath: String) {
         val jsonString = File(filePath).readText(Charsets.UTF_8)
         val gson = Gson()
@@ -143,8 +155,23 @@ class ToDoList {
         taskList.addAll(tasks)
         println("your file was added")
     }
-    fun sort(taskList: MutableList<Task>){
-        taskList.sortByDescending { it.createdDate}
+
+    fun sort(taskList: MutableList<Task>) {
+        taskList.sortBy { it.createdDate }
     }
 
+    fun search(query: String) {
+        val check: ArrayList<Task> = arrayListOf()
+        taskList.forEach { task->
+            if(task.title==query){
+                check.add(task)
+            }
+        }
+        if (check.isEmpty()) {
+            println("No tasks found with the query $query.")
+        } else {
+            println(check)
+        }
+    }
 }
+
