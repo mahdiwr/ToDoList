@@ -7,23 +7,29 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.Calendar
 import java.util.Date
+import android.content.Context
+import java.io.IOException
+import java.time.LocalDateTime
+
 
 fun main() {
     val toDoList = ToDoList()
     val filePath = "D:/list"
 
     while (true) {
-        println("1-> add task")
-        println("2-> remove task")
-        println("3-> complete task")
-        println("4-> show tasks")
-        println("5-> save file")
-        println("0-> exit")
+        println("1-> Add task")
+        println("2-> Remove task")
+        println("3-> Complete task")
+        println("4-> Show tasks")
+        println("5-> Save file")
+        println("6-> Input Json")
+        println("7-> Sort By Date")
+        println("0-> Exit")
 
-        when (readLine()) {
+        when (readlnOrNull()) {
             "1" -> {
                 print("Add your item: ")
-                val item = readLine()
+                val item = readlnOrNull()
                 if (!item.isNullOrBlank()) {
                     toDoList.addTask(item)
                     toDoList.showTask()
@@ -53,9 +59,19 @@ fun main() {
                 toDoList.showTask()
             }
             "5" -> {
-
                 toDoList.saveListToJsonFile(toDoList.taskList,filePath)
                 println("your file was saved")
+            }
+            "6" -> {
+                println("input your path : ")
+                val path_file = readlnOrNull()
+                toDoList.gsonReader(path_file?:"")
+            }
+            "7" -> {
+                println("sorted by Date : ${toDoList.sort(toDoList.taskList)}")
+                toDoList.taskList.forEach { task ->
+                    println("Task: ${task.title}, Created at: ${task.createdDate}")
+                }
             }
             "0" -> {
                 println("Exiting...")
@@ -67,12 +83,12 @@ fun main() {
         }
     }
 }
-@Serializable
+
 data class Task(
     val id: Int = 0,
     val title: String = "",
     var isCompleted: Boolean = false,
-//  val createdDate: Date = Calendar.getInstance().time
+    val createdDate: Date
 )
 
 class ToDoList {
@@ -81,7 +97,7 @@ class ToDoList {
     var nextId = 0
 
     fun addTask(title: String) {
-        taskList.add(Task(id = nextId++, title = title))
+        taskList.add(Task(id = nextId++, title = title, createdDate = Calendar.getInstance().time))
         println("Item '$title' added.")
     }
 
@@ -110,7 +126,7 @@ class ToDoList {
             for ((index, task) in taskList.withIndex()) {
                 val status = if (task.isCompleted) "Completed" else "Pending"
 
-                println("${index + 1}. ${task.title} [$status]")
+                println("${index + 1}. ${task.title} [$status] created at : ${task.createdDate}")
 
             }
         }
@@ -118,8 +134,17 @@ class ToDoList {
     }
     fun saveListToJsonFile(list: MutableList<Task>, filePath: String) {
         val jsonString = Gson().toJson(list)
-//        val jsonString = Gson().encodeToString(list)
         File(filePath,"todo.json").writeText(jsonString)
+    }
+    fun gsonReader(filePath: String) {
+        val jsonString = File(filePath).readText(Charsets.UTF_8)
+        val gson = Gson()
+        val tasks: List<Task> = gson.fromJson(jsonString, Array<Task>::class.java).toList()
+        taskList.addAll(tasks)
+        println("your file was added")
+    }
+    fun sort(taskList: MutableList<Task>){
+        taskList.sortByDescending { it.createdDate}
     }
 
 }
